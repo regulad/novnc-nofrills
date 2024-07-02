@@ -34,3 +34,4 @@ Useful for projects like https://github.com/regulad/workspaces-images/blob/189d2
 ```bash
 pnpm run build
 ```
+w

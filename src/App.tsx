@@ -1,20 +1,10 @@
 import {useRef, useState} from 'react'
 import './App.css'
 // @ts-expect-error -- the types are exported wrong
-import {VncScreen, VncScreenHandle} from "react-vnc";
+import {VncScreen, VncScreenHandle, RFB} from "react-vnc";
 import ISpinner from "./ispinner.tsx";
-// @ts-expect-error -- hacky
-import RFB from "react-vnc/dist/types/noVNC/core/rfb";
 
-function renderFail(reason: string) {
-  return (
-    <div>
-      <h1>Failed to connect</h1>
-      <p>{reason}</p>
-      {/*<button onClick={retry}>Attempt reconnection</button>*/}
-    </div>
-  )
-}
+type WSProtocol = "text" | "binary";
 
 function App() {
   const ref = useRef<VncScreenHandle>(null);
@@ -43,6 +33,14 @@ function App() {
   const url = params.get('url') ?? defaultUrl;
   const username = params.get('username');
   const password = params.get('password');
+  let urlProtocol = params.get('protocol') ?? "binary";
+
+  if (urlProtocol !== "text" && urlProtocol !== "binary") {
+    console.log("Invalid protocol", urlProtocol); // can't escape here because it would break rule of hooks
+    urlProtocol = "binary";
+  }
+
+  const [protocol, setProtocol] = useState<WSProtocol>(urlProtocol as WSProtocol);
 
   // other configs
   const qualityLevel = params.get('qualityLevel') ?? undefined;
@@ -55,17 +53,34 @@ function App() {
     setFailureReason(reason)
   }
 
+  function Fail({reason}: Readonly<{reason: string}>) {
+    return (
+      <div>
+        <h1>Failed to connect</h1>
+        <p>{reason}</p>
+        <button onClick={() => {
+          setProtocol(protocol === "text" ? "binary" : "text")
+        }}>Switch protocol</button>
+      </div>
+    )
+  }
+
   if (!url) {
     return (
-      renderFail('No URL provided')
+      <Fail reason="No URL provided"/>
     )
   }
 
   if (isFailed) {
     return (
-      renderFail(failureReason)
+      <Fail reason={failureReason}/>
     )
   }
+
+  // KasmVNC client headers: https://gist.github.com/regulad/f4cbce7d9313a483bf1a99da910a9a39
+  // our client's headers: https://gist.github.com/regulad/0d89c8d2456e5b6f86887d17b3e4979e
+
+  // to set Sec-WebSocket-Protocol: binary or Sec-WebSocket-Protocol: text should make it work
 
   // https://github.com/novnc/noVNC/blob/master/docs/API.md#properties
   return (
@@ -79,6 +94,9 @@ function App() {
       scaleViewport
       clipViewport
       autoConnect
+      rfbOptions={{
+        wsProtocols: [protocol]
+      }}
       loadingUI={<ISpinner large/>}
       background="rgba(0, 0, 0, 0)"
       style={{
