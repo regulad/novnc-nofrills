@@ -19,8 +19,11 @@ Used as part of Doppelganger and test-scrcpy.
 - `compressionLevel` https://github.com/novnc/noVNC/blob/master/docs/API.md#properties:~:text=Disabled%20by%20default.-,compressionLevel,-Is%20an%20int
 - `retryDuration` ms between reconnection attempts. Default is 3000.
 - `viewOnly` https://github.com/novnc/noVNC/blob/master/docs/API.md#properties:~:text=Disabled%20by%20default.-,viewOnly,-Is%20a%20boolean
+- ...and more! See App.tsx
 
 ## Running
+
+**First, you'll need to `git clone https://github.com/regulad/react-kasmvnc` into the same parent folder as this project. Then, run `npm run prepare` in that project. Sorry for the nightmare...**
 
 ```bash
 pnpm install
@@ -34,4 +37,10 @@ Useful for projects like https://github.com/regulad/workspaces-images/blob/189d2
 ```bash
 pnpm run build
 ```
-w
+
+
+## TODO
+
+- [x] Connect to KasmVNC servers and use keyboard/mouse
+- [x] Port to React for ease of reactivity
+- [ ] Kasm audio support (port from KasmVDI)
