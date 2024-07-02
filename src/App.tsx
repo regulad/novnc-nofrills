@@ -16,6 +16,7 @@ function App() {
   const hostname = params.get('hostname') ?? window.location.hostname;
   const port = params.get('port') ?? window.location.port;
   const path = params.get('path') ?? "websockify";
+
   // https://github.com/novnc/noVNC/blob/7fcf9dcfe0cc5b14e3841a4429dc091a6ffca861/vnc_lite.html#L143
   let defaultUrl;
   if (window.location.protocol === "https:") {
@@ -33,14 +34,7 @@ function App() {
   const url = params.get('url') ?? defaultUrl;
   const username = params.get('username');
   const password = params.get('password');
-  let urlProtocol = params.get('protocol') ?? "binary";
-
-  if (urlProtocol !== "text" && urlProtocol !== "binary") {
-    console.log("Invalid protocol", urlProtocol); // can't escape here because it would break rule of hooks
-    urlProtocol = "binary";
-  }
-
-  const [protocol, setProtocol] = useState<WSProtocol>(urlProtocol as WSProtocol);
+  const protocol = (params.get('protocol') ?? "binary") as WSProtocol;
 
   // other configs
   const qualityLevel = params.get('qualityLevel') ?? undefined;
@@ -58,9 +52,6 @@ function App() {
       <div>
         <h1>Failed to connect</h1>
         <p>{reason}</p>
-        <button onClick={() => {
-          setProtocol(protocol === "text" ? "binary" : "text")
-        }}>Switch protocol</button>
       </div>
     )
   }
@@ -79,6 +70,7 @@ function App() {
 
   // KasmVNC client headers: https://gist.github.com/regulad/f4cbce7d9313a483bf1a99da910a9a39
   // our client's headers: https://gist.github.com/regulad/0d89c8d2456e5b6f86887d17b3e4979e
+  // https://www.diffchecker.com/TqldOLTj/
 
   // to set Sec-WebSocket-Protocol: binary or Sec-WebSocket-Protocol: text should make it work
 
@@ -95,7 +87,13 @@ function App() {
       clipViewport
       autoConnect
       rfbOptions={{
-        wsProtocols: [protocol]
+        wsProtocols: [protocol],
+        shared: true,
+        repeaterID: '',
+        credentials: {
+          username: username ?? undefined,
+          password: password ?? undefined,
+        }
       }}
       loadingUI={<ISpinner large/>}
       background="rgba(0, 0, 0, 0)"
@@ -111,19 +109,6 @@ function App() {
       //   console.log("Disconnected", rfb);
       //   fail('Disconnected (cannot reconnect)');
       // }}
-      onCredentialsRequired={(rfb?: RFB) => {
-        console.log("Password required", rfb);
-        if (!password) {
-          fail('Password required but not provided');
-          return;
-        }
-        ref.current.sendCredentials(!!username ? {
-          username: username,
-          password: password,
-        } : {
-          password: password,
-        });
-      }}
       onSecurityFailure={(rfb?: RFB) => {
         console.log("Security failure", rfb);
         const reason: string | null = rfb?.detail?.reason;
