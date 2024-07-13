@@ -23,8 +23,6 @@ Used as part of Doppelganger and test-scrcpy.
 
 ## Running
 
-**First, you'll need to `git clone https://github.com/regulad/react-kasmvnc` into the same parent folder as this project. Then, run `npm run prepare` in that project. Sorry for the nightmare...**
-
 ```bash
 pnpm install
 pnpm run dev

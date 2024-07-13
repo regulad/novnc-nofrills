@@ -8,7 +8,7 @@ import type {
 } from "react-kasmvnc/dist/types/lib/VncScreen";
 import ISpinner from "./ispinner.tsx";
 // @ts-expect-error -- the types are exported wrong
-import {RFB as KasmVNCRFB} from "react-kasmvnc/dist/types/noVNC/core/rfb";
+import type {RFB as KasmVNCRFB} from "react-kasmvnc/dist/types/noVNC/core/rfb";
 
 function buildDefaultUrl(hostname: string, port: string, path: string): string {
   let defaultUrl = window.location.protocol === "https:" ? 'wss' : 'ws';
